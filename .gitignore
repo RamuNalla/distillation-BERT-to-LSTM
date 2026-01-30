@@ -4,3 +4,4 @@ venv/
 *.pkl
 __pycache__/
 .env
+models/teacher/final_teacher
