@@ -16,22 +16,29 @@ def count_parameters(model):
 def measure_metrics(model, sample_input, iterations=100):
     """Measures average latency and throughput."""
     model.eval()
-    # Warm-up (standard practice to avoid initial cold-start lag)
+    
+    # Warm-up phase
     with torch.no_grad():
         for _ in range(10):
-            _ = model(**sample_input) if isinstance(model, torch.nn.Module) else model(sample_input)
+            # Check if it's the Teacher (Hugging Face) or Student (Custom)
+            if hasattr(model, "config"): 
+                _ = model(**sample_input)
+            else:
+                # Only pass the input_ids tensor to the Student
+                _ = model(sample_input['input_ids'])
     
+    # Actual Benchmark
     start_time = time.perf_counter()
     with torch.no_grad():
         for _ in range(iterations):
-            if hasattr(model, "config"): # Teacher (HuggingFace)
+            if hasattr(model, "config"):
                 _ = model(**sample_input)
-            else: # Student (PyTorch)
+            else:
                 _ = model(sample_input['input_ids'])
     end_time = time.perf_counter()
     
-    avg_latency = (end_time - start_time) / iterations * 1000 # in ms
-    throughput = iterations / (end_time - start_time) # samples/sec
+    avg_latency = (end_time - start_time) / iterations * 1000 
+    throughput = iterations / (end_time - start_time) 
     return avg_latency, throughput
 
 def run_benchmark():
