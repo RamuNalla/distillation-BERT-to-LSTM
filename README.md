@@ -53,6 +53,17 @@ I built an interactive dashboard using **Streamlit** to visualize the distillati
 ### The Student: Bi-LSTM (Bidirectional Long Short-Term Memory)
 - **Role:** The Apprentice. A custom PyTorch implementation.
 - **Why:** LSTMs are sequentially much faster (`O(n)`) and require significantly less RAM than the `O(n^2)` attention mechanism of Transformers.
+- The custom lightweight architecture optimized for CPU inference is used. Unlike the Teacher's 12-layer Transformer stack, this Student uses a shallow, recurrent approach.
+
+    | Hyperparameter | Value | Description |
+    | :--- | :--- | :--- |
+    | **Vocabulary Size** | 30,522 | Matches BERT's `WordPiece` tokenizer for compatibility. |
+    | **Embedding Dim** | 128 | Dense vector representation for input tokens. |
+    | **Hidden Dimension** | 256 | The size of the LSTM's internal memory state. |
+    | **Layers** | 2 | Stacked LSTM layers for capturing deeper semantic patterns. |
+    | **Bidirectional** | True | Processes text Left-to-Right and Right-to-Left simultaneously. |
+    | **Dropout** | 0.3 | Regularization applied to prevent overfitting during distillation. |
+    | **Classifier Head** | Linear | Maps the concatenated hidden states ($256 \times 2 = 512$) to 2 classes. |
 
 ### The Distillation Process
 Instead of training the Student on just hard labels (0 or 1), I trained it using a **Dual-Loss Function**:
